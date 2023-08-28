@@ -1,91 +1,108 @@
+import { useNavigate, TitleBar, Loading } from "@shopify/app-bridge-react";
 import {
   Card,
-  Page,
+  EmptyState,
   Layout,
-  TextContainer,
-  Image,
-  Stack,
-  Link,
-  Text,
+  Page,
+  SkeletonBodyText,
 } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
-import { useTranslation, Trans } from "react-i18next";
-
-import { trophyImage } from "../assets";
-
-import { ProductsCard } from "../components";
+import { QRCodeIndex } from "../components";
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  /*
+    Add an App Bridge useNavigate hook to set up the navigate function.
+    This function modifies the top-level browser URL so that you can
+    navigate within the embedded app and keep the browser in sync on reload.
+  */
+  const navigate = useNavigate();
+
+  /*
+    These are mock values. Setting these values lets you preview the loading markup and the empty state.
+  */
+  const isLoading = false;
+  const isRefetching = false;
+  const QRCodes = [
+    {
+      createdAt: "2022-06-13",
+      destination: "checkout",
+      title: "My first QR code",
+      id: 1,
+      discountCode: "SUMMERDISCOUNT",
+      product: {
+        title: "Faded t-shirt",
+      }
+    },
+    {
+      createdAt: "2022-06-13",
+      destination: "product",
+      title: "My second QR code",
+      id: 2,
+      discountCode: "WINTERDISCOUNT",
+      product: {
+        title: "Cozy parka",
+      }
+    },
+    {
+      createdAt: "2022-06-13",
+      destination: "product",
+      title: "QR code for deleted product",
+      id: 3,
+      product: {
+        title: "Deleted product",
+      }
+    },
+  ];
+
+  /* Set the QR codes to use in the list */
+  const qrCodesMarkup = QRCodes?.length ? (
+    <QRCodeIndex QRCodes={QRCodes} loading={isRefetching} />
+  ) : null;
+
+  /* loadingMarkup uses the loading component from AppBridge and components from Polaris  */
+  const loadingMarkup = isLoading ? (
+    <Card sectioned>
+      <Loading />
+      <SkeletonBodyText />
+    </Card>
+  ) : null;
+
+  /* Use Polaris Card and EmptyState components to define the contents of the empty state */
+  const emptyStateMarkup =
+    !isLoading && !QRCodes?.length ? (
+      <Card sectioned>
+        <EmptyState
+          heading="Create unique QR codes for your product"
+          action={{
+            content: "Create QR code",
+            onAction: () => navigate("/qrcodes/new"),
+          }}
+          image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+        >
+          <p>
+            Allow customers to scan codes and buy products using their phones.
+          </p>
+        </EmptyState>
+      </Card>
+    ) : null;
+
+  /*
+    Use Polaris Page and TitleBar components to create the page layout,
+    and include the empty state contents set above.
+  */
   return (
-    <Page narrowWidth>
-      <TitleBar title={t("HomePage.title")} primaryAction={null} />
+    <Page fullWidth={!!qrCodesMarkup}>
+      <TitleBar
+        title="QR codes"
+        primaryAction={{
+          content: "Create QR code",
+          onAction: () => navigate("/qrcodes/new"),
+        }}
+      />
       <Layout>
         <Layout.Section>
-          <Card sectioned>
-            <Stack
-              wrap={false}
-              spacing="extraTight"
-              distribution="trailing"
-              alignment="center"
-            >
-              <Stack.Item fill>
-                <TextContainer spacing="loose">
-                  <Text as="h2" variant="headingMd">
-                    {t("HomePage.heading")}
-                  </Text>
-                  <p>
-                    <Trans
-                      i18nKey="HomePage.yourAppIsReadyToExplore"
-                      components={{
-                        PolarisLink: (
-                          <Link url="https://polaris.shopify.com/" external />
-                        ),
-                        AdminApiLink: (
-                          <Link
-                            url="https://shopify.dev/api/admin-graphql"
-                            external
-                          />
-                        ),
-                        AppBridgeLink: (
-                          <Link
-                            url="https://shopify.dev/apps/tools/app-bridge"
-                            external
-                          />
-                        ),
-                      }}
-                    />
-                  </p>
-                  <p>{t("HomePage.startPopulatingYourApp")}</p>
-                  <p>
-                    <Trans
-                      i18nKey="HomePage.learnMore"
-                      components={{
-                        ShopifyTutorialLink: (
-                          <Link
-                            url="https://shopify.dev/apps/getting-started/add-functionality"
-                            external
-                          />
-                        ),
-                      }}
-                    />
-                  </p>
-                </TextContainer>
-              </Stack.Item>
-              <Stack.Item>
-                <div style={{ padding: "0 20px" }}>
-                  <Image
-                    source={trophyImage}
-                    alt={t("HomePage.trophyAltText")}
-                    width={120}
-                  />
-                </div>
-              </Stack.Item>
-            </Stack>
-          </Card>
-        </Layout.Section>
-        <Layout.Section>
-          <ProductsCard />
+          {loadingMarkup}
+          {qrCodesMarkup}
+          {emptyStateMarkup}
         </Layout.Section>
       </Layout>
     </Page>

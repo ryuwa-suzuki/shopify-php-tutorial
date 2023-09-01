@@ -76,6 +76,23 @@ class QrCodeController extends Controller
         }
     }
 
+    /**
+     * get QR code record by id.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show ($id)
+    {
+        $qrCode = $this->qrCodeHelper->getQrCodeOr404($id);
+        if ($qrCode) {
+            $code = 200;
+            $this->__addImageUrl($qrCode);
+            $response = $this->qrCodeHelper->formatQrCodeResponse([$qrCode->toArray()])[0];
+            return response()->json($response, $code);
+        }
+    }
+
     private function __addImageUrl($qrCode)
     {
         try {

@@ -148,4 +148,5 @@ Route::post('/api/webhooks', function (Request $request) {
 Route::middleware('shopify.auth')->group(function () {
     Route::get('/api/csrf-token', fn () => ['csrf_token' => csrf_token()]);
     Route::post('/api/qrcodes', [QrCodeController::class, 'create']);
+    Route::get('/api/qrcodes', [QrCodeController::class, 'index']);
 });

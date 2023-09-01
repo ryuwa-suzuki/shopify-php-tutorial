@@ -82,6 +82,8 @@ class EnsureShopifySession
 
             if ($proceed) {
                 $request->attributes->set('shopifySession', $session);
+                // ショップのドメインをリクエストの属性に追加
+                $request->attributes->set('shopDomain', 'https://'.$session->getShop());
                 return $next($request);
             }
         }

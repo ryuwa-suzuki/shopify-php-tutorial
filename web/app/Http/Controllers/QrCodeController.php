@@ -45,4 +45,46 @@ class QrCodeController extends Controller
             return response()->json($response, $code);
         }
     }
+
+    /**
+     * get List QR code record.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index (Request $request)
+    {
+        $response = $code = null;
+        try {
+            $qrCodes = QrCode::where('shopDomain', $request->get('shopDomain'))->get()->toArray();
+            $responseData = [];
+            $code = 200;
+            foreach ($qrCodes as $qrCode) {
+                $responseData[] = $this->__addImageUrl($qrCode);
+            }
+
+            $response = $this->qrCodeHelper->formatQrCodeResponse($responseData);
+
+        } catch (\Exception $e) {
+            $code = 500;
+            $response = $e->getMessage();
+
+            Log::error("Failed to index qrcodes: $response");
+
+        } finally {
+            return response()->json($response, $code);
+        }
+    }
+
+    private function __addImageUrl($qrCode)
+    {
+        try {
+            $qrCode['imageUrl'] = $this->__generateQrcodeImageUrl($qrCode);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
+
+        return $qrCode;
+    }
+
 }

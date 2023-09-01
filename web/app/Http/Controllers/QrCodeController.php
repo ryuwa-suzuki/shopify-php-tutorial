@@ -134,4 +134,20 @@ class QrCodeController extends Controller
             return response()->json($response, $code);
         }
     }
+
+    /**
+     * delete QR code record.
+     *
+     * @param  int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete ($id)
+    {
+        $qrCode = $this->qrCodeHelper->getQrCodeOr404($id);
+        if ($qrCode) {
+            $code = 200;
+            $qrCode->delete();
+            return response()->json('', $code);
+        }
+    }
 }

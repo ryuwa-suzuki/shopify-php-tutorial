@@ -104,4 +104,34 @@ class QrCodeController extends Controller
         return $qrCode;
     }
 
+    /**
+     * update QR code record.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update (Request $request, $id)
+    {
+        $response = $code = null;
+        $qrCode = $request->all();
+        $qrCode['shopDomain'] = $request->get('shopDomain');
+
+        try{
+            $rowCodeData = [];
+            $code = 200;
+            QrCode::where('id', $id)->update($qrCode);
+
+            $rowCodeData[] = QrCode::find($id)->toArray();
+            $response = $this->qrCodeHelper->formatQrCodeResponse($rowCodeData)[0];
+
+        } catch (\Exception $e) {
+            $code = 500;
+            $response = $e->getMessage();
+
+            Log::error("Failed to update qrcodes: $response");
+
+        } finally {
+            return response()->json($response, $code);
+        }
+    }
 }

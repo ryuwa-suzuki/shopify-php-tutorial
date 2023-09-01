@@ -150,4 +150,5 @@ Route::middleware('shopify.auth')->group(function () {
     Route::post('/api/qrcodes', [QrCodeController::class, 'create']);
     Route::get('/api/qrcodes', [QrCodeController::class, 'index']);
     Route::get('/api/qrcodes/{id}', [QrCodeController::class, 'show']);
+    Route::patch('/api/qrcodes/{id}', [QrCodeController::class, 'update']);
 });

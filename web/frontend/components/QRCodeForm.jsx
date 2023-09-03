@@ -210,10 +210,31 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
     For now, it contains only the default value.
   */
-  const shopData = null;
-  const isLoadingShopData = true;
-  const discountOptions = [NO_DISCOUNT_OPTION];
+  const {
+    data: shopData,
+    isLoading: isLoadingShopData,
+    isError: shopDataError,
+    /* useAppQuery makes a query to `/api/shop-data`, which the backend authenticates before fetching the data from the Shopify GraphQL Admin API */
+  } = useAppQuery({ url: "/api/shop-data" });
 
+  /*
+    This array is used in a select field in the form to manage discount options
+  */
+  const discountOptions = shopData
+    ? [
+        NO_DISCOUNT_OPTION,
+        ...shopData.codeDiscountNodes.edges.map(
+          ({ node: { id, codeDiscount } }) => {
+            DISCOUNT_CODES[id] = codeDiscount.codes.edges[0].node.code;
+
+            return {
+              label: codeDiscount.codes.edges[0].node.code,
+              value: id,
+            };
+          }
+        ),
+      ]
+    : [];
 
   /*
     This function runs when a user clicks the "Go to destination" button.
@@ -395,7 +416,7 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
         <Layout.Section secondary>
           <Card sectioned title="QR code">
             {QRCode ? (
-              <EmptyState imageContained={true} image={QRCodeURL} />
+              <EmptyState fullWidth={true} image={QRCodeURL} />
             ) : (
               <EmptyState>
                 <p>Your QR code will appear here after you save.</p>

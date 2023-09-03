@@ -6,10 +6,55 @@ use Illuminate\Http\Request;
 use App\Models\QrCode;
 use Illuminate\Support\Facades\Log;
 use App\Lib\QrCodeHelper;
+use Shopify\Clients\Graphql;
 
 class QrCodeController extends Controller
 {
     private $qrCodeHelper;
+
+    private const SHOP_DATA_QUERY = <<<'QUERY'
+    query shopData($first: Int!) {
+        shop {
+            url
+        }
+        codeDiscountNodes(first: $first) {
+            edges {
+                node {
+                    id
+                    codeDiscount {
+                    ... on DiscountCodeBasic {
+                        codes(first: 1) {
+                        edges {
+                            node {
+                            code
+                            }
+                        }
+                        }
+                    }
+                    ... on DiscountCodeBxgy {
+                        codes(first: 1) {
+                            edges {
+                                node {
+                                code
+                                }
+                            }
+                        }
+                    }
+                    ... on DiscountCodeFreeShipping {
+                        codes(first: 1) {
+                            edges {
+                                node {
+                                code
+                                }
+                            }
+                        }
+                    }
+                    }
+                }
+            }
+        }
+    }
+    QUERY;
 
     public function __construct(QrCodeHelper $qrCodeHelper)
     {
@@ -149,5 +194,24 @@ class QrCodeController extends Controller
             $qrCode->delete();
             return response()->json('', $code);
         }
+    }
+
+    /**
+     * ディスカウントをshopifyから取得
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDisCounts(Request $request)
+    {
+        $session = $request->get('shopifySession');
+        $client = new Graphql($session->getShop(), $session->getAccessToken());
+
+        $shopData = $client->query([
+            'query' => self::SHOP_DATA_QUERY,
+            'variables' => ['first' => 25],
+        ])->getDecodedBody();
+
+        return response()->json($shopData['data']);
     }
 }

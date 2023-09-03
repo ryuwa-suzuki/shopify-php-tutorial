@@ -1,3 +1,27 @@
-# This file stores configurations for your Shopify app.
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-scopes = "write_products"
+name = "app-php-tutorial"
+client_id = "641d6fbef8ee715828bd1e55b01f2713"
+application_url = "https://typing-broke-trained-nintendo.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products,read_discounts"
+
+[auth]
+redirect_urls = [
+  "https://typing-broke-trained-nintendo.trycloudflare.com/auth/callback",
+  "https://typing-broke-trained-nintendo.trycloudflare.com/auth/shopify/callback",
+  "https://typing-broke-trained-nintendo.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-07"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "suzuki-app-dev2.myshopify.com"

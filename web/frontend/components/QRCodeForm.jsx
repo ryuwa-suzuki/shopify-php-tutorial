@@ -183,8 +183,24 @@ export function QRCodeForm({ QRCode: InitialQRCode }) {
 
     It will be replaced by a different function when the frontend is connected to the backend.
   */
-  const isDeleting = false;
-  const deleteQRCode = () => console.log("delete");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteQRCode = useCallback(async () => {
+    reset();
+    /* The isDeleting state disables the download button and the delete QR code button to show the user that an action is in progress */
+    setIsDeleting(true);
+    const csrfToken = await csrf();
+    const response = await fetch(`/api/qrcodes/${QRCode.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        'X-CSRF-TOKEN': csrfToken
+      },
+    });
+
+    if (response.ok) {
+      navigate(`/`);
+    }
+  }, [QRCode]);
 
 
   /*
